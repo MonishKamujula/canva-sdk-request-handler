@@ -15,6 +15,11 @@ class StepBreakdown(BaseModel):
     steps: list[str]
     rag_query : list[str]
 
+class CanvaRequest(BaseModel):
+    function : dict
+class CanvaReturnFormat(BaseModel):
+    functions : list(CanvaRequest)
+
 @app.route("/canvarequest" , methods=['POST'])
 def canvarequest():
 
@@ -45,6 +50,8 @@ def canvarequest():
     - An element that renders a vector shape and has positional properties.
     - An element that renders a table.
     - An element that renders a table and has positional properties.
+
+    # Strictly use this link as a place holder for the dataURL : http://127.0.0.1:5001/search-image?query=<desctibe the image>
     '''
 
     response = step_client.responses.parse(
@@ -62,6 +69,12 @@ def canvarequest():
     print("Step Breakdown : " , response)
     print("STEP BREAKDOWN WITH OUTPUT PRASED : " , response.output_parsed)
 
+    def search_pexels_image(query):
+        headers = {"Authorization": "xwjeCY8K2Lz6sYAAwVlUvMEC2rt4cJ2hDVjlEfUdwCTsgyv2jh2MmKQZ"}
+        params = {"query": query, "per_page": 1}
+        response = requests.get("https://api.pexels.com/v1/search", headers=headers, params=params)
+        return response.json()['photos'][0]['src']['medium']
+    
     all_steps = response.output_parsed
 
     return_type_format = handle_rag(all_steps.rag_query)
@@ -69,6 +82,7 @@ def canvarequest():
     prompt = f'''
     Return array of json value in the following format according for given input steps :
     {return_type_format} 
+    the output should be only a list of json objects, where each json object is a canva function format as given above"
     '''
 
     user_steps = ",".join(all_steps.steps)
