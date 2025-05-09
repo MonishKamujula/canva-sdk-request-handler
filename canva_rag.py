@@ -2,6 +2,7 @@ import re
 import openai
 from pprint import pprint
 
+
 import os
 from dotenv import load_dotenv
 
@@ -46,13 +47,13 @@ def split_tabs(text):
     return chunks
 
 
-def load_chunks_to_vectorstore(chunks , query):
+def load_chunks_to_vectorstore(chunks , query , top_k = 1):
     docs = [Document(page_content=content, metadata={"tab": name}) for name, content in chunks]
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=24000, chunk_overlap=200     )
     docs = text_splitter.split_documents(docs)
     vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings())
-    retrieved_docs = vectorstore.similarity_search(query, k=1)
+    retrieved_docs = vectorstore.similarity_search(query, k=top_k)
     print("Retrieved documents:")
     for doc in retrieved_docs:
         print(doc.page_content)
@@ -62,14 +63,15 @@ def load_chunks_to_vectorstore(chunks , query):
 
 
 def handle_rag(request_input):
-    query = request_input
+    top_k = len(set(request_input))
+    query = ",".join(request_input)
     file_path = "addElementAtPoint.txt"
     text = ""
     with open(file_path, 'r', encoding='utf-8') as file:
         text = file.read()
         
     chunks = split_tabs(text)
-    doc = load_chunks_to_vectorstore(chunks , query)
+    doc = load_chunks_to_vectorstore(chunks , query, top_k)
     print("THE DOCUMENT VALUE IS : " , doc)
     return doc
 
