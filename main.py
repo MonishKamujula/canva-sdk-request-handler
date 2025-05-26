@@ -29,6 +29,7 @@ class StepBreakdown(BaseModel):
 @app.route("/canvarequest" , methods=['POST'])
 def canvarequest():
     user_input = request.get_json()['user_input']
+    page_dimensions = request.get_json()['page_dimensions']
     print("User Input is : " , user_input)
     step_client = OpenAI()
     step_prompt = f'''
@@ -85,7 +86,8 @@ def canvarequest():
     prompt = f'''
     Return array of json value in the following format according for given input steps :
     {return_type_format} 
-    the output should be only a list of json objects, where each json object is a canva function format as given above. No extra tags, no extra lines, no extra spaces. Should start with [ and end with ], don't add any comments."
+    the output should be only a list of json objects, where each json object is a canva function format as given above. No extra tags, no extra lines, no extra spaces. Should start with [ and end with ], don't add any comments.
+    page_dimensions : {page_dimensions}, they are in this format : (width, height) format
     '''
 
     user_steps = ",".join(all_steps.steps)
