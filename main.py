@@ -77,7 +77,11 @@ def canvarequest():
         headers = {"Authorization": "xwjeCY8K2Lz6sYAAwVlUvMEC2rt4cJ2hDVjlEfUdwCTsgyv2jh2MmKQZ"}
         params = {"query": query, "per_page": 1}
         response = requests.get("https://api.pexels.com/v1/search", headers=headers, params=params)
-        return response.json()['photos'][0]['src']['medium']
+        try: 
+            return response.json()['photos'][0]['src']['medium']
+        except IndexError as e:
+            return "https://sdmntprwestus2.oaiusercontent.com/files/00000000-a9c4-61f8-9b98-3d68ca202d85/raw?se=2025-05-26T17%3A13%3A57Z&sp=r&sv=2024-08-04&sr=b&scid=6a86632d-ced8-54c2-82a9-a22533a27d6f&skoid=ea0c7534-f237-4ccd-b7ea-766c4ed977ad&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-05-26T11%3A03%3A15Z&ske=2025-05-27T11%3A03%3A15Z&sks=b&skv=2024-08-04&sig=4ojmkwBprZCOLH1pf73C0k8QA0TuhpOZNrHrHUzI04I%3D"
+        
     
     all_steps = response.output_parsed
 
