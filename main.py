@@ -1,11 +1,17 @@
 from openai import OpenAI
-from flask import Flask
+from flask import Flask, jsonify
+from flask_cors import CORS
 from flask import request
 from canva_rag import handle_rag
 import openai
 from pydantic import BaseModel
+from pprint import pprint
+import requests
+import re
+import json
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def hello_world():
@@ -15,16 +21,15 @@ class StepBreakdown(BaseModel):
     steps: list[str]
     rag_query : list[str]
 
-class CanvaRequest(BaseModel):
-    function : dict
-class CanvaReturnFormat(BaseModel):
-    functions : list(CanvaRequest)
+# class CanvaRequest(BaseModel):
+#     function : dict
+# class CanvaReturnFormat(BaseModel):
+#     functions : list(CanvaRequest)
 
 @app.route("/canvarequest" , methods=['POST'])
 def canvarequest():
-
     user_input = request.get_json()['user_input']
-
+    print("User Input is : " , user_input)
     step_client = OpenAI()
     step_prompt = f'''
     #Break down the given input into smaller technical step commands seperated by comma to generate a document.
@@ -32,7 +37,7 @@ def canvarequest():
     if given input is "Add information about animal on the page" then output should be :
     Add heading about animal on the page, Add image about animal at center of the page, Add paragraph about animal at bottom of the page
     Also according to command provide the list of rag query required for steps. Here is the list of rag query:
-    - An element that renders image content.
+    - An element that renders image.
     - An element that renders image content and has positional properties.
     - An element that renders video content.
     - An element that renders video content and has positional properties.
@@ -50,8 +55,6 @@ def canvarequest():
     - An element that renders a vector shape and has positional properties.
     - An element that renders a table.
     - An element that renders a table and has positional properties.
-
-    # Strictly use this link as a place holder for the dataURL : http://127.0.0.1:5001/search-image?query=<desctibe the image>
     '''
 
     response = step_client.responses.parse(
@@ -82,7 +85,7 @@ def canvarequest():
     prompt = f'''
     Return array of json value in the following format according for given input steps :
     {return_type_format} 
-    the output should be only a list of json objects, where each json object is a canva function format as given above"
+    the output should be only a list of json objects, where each json object is a canva function format as given above. No extra tags, no extra lines, no extra spaces. Should start with [ and end with ], don't add any comments."
     '''
 
     user_steps = ",".join(all_steps.steps)
@@ -94,8 +97,20 @@ def canvarequest():
         instructions=prompt,
         input=user_steps,
     )
+    
+    print("Response is : " , response.output_text)
+    edited_response = json.loads(response.output_text)
 
-    return response.output_text
+    for item in edited_response:
+        print("Item is : " , item)
+        if "ref" in item:
+            old = item["ref"]
+            print("Old is : " , old)
+            print("New is : " , search_pexels_image(old))
+            print("__________________________________________________________________________")
+            item["ref"] = search_pexels_image(old)
+    print("Edited Response : " , json.dumps(edited_response, indent=2))
+    return json.dumps(edited_response, indent=2)
 
 
 if __name__ == "__main__":

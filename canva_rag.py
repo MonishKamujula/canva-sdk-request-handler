@@ -34,15 +34,15 @@ def split_tabs(text):
     if stack:
         chunks.append((stack[-1], text[pos:]))
 
-    print("+++++++++++++++++++++++++++++++++++++++")
-    print("FIRST 3 CHUNKS:")
-    print("+++++++++++++++++++++++++++++++++++++++")
-    for name, content in chunks[:2]:
-        print(f"Tab: {name}")
-        print("Content:")
-        print(content)
-        print("=======================================")
-    print("+++++++++++++++++++++++++++++++++++++++")
+    # print("+++++++++++++++++++++++++++++++++++++++")
+    # print("FIRST 3 CHUNKS:")
+    # print("+++++++++++++++++++++++++++++++++++++++")
+    # for name, content in chunks[:2]:
+    #     print(f"Tab: {name}")
+    #     print("Content:")
+    #     print(content)
+    #     print("=======================================")
+    # print("+++++++++++++++++++++++++++++++++++++++")
 
     return chunks
 
@@ -56,7 +56,7 @@ def load_chunks_to_vectorstore(chunks , query , top_k = 1):
     retrieved_docs = vectorstore.similarity_search(query, k=top_k)
     print("Retrieved documents:")
     for doc in retrieved_docs:
-        print(doc.page_content)
+        # print(doc.page_content)
         print(doc.metadata)
         print("=======================================")
     return retrieved_docs
