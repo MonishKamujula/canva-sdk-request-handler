@@ -262,10 +262,6 @@ Add element to fixed designs, which use a coordinate-based positioning system.
                 </Prop.Extras>
               </Prop>
 
-              <Prop name="dataUrl" type="string">
-                A data URL that contains the image data.
-              </Prop>
-
               <Prop name="ref" required type="ImageRef">
                 a word or 2 two describe the image this should like a str, with no specal chars, for example if you want a dog, "dog"
               </Prop>
@@ -496,7 +492,7 @@ Add element to fixed designs, which use a coordinate-based positioning system.
               </Prop>
 
               <Prop name="textAlign" type="string">
-                The alignment of the text.
+                The alignment of the text. For text that go off screen use center to let it wrap.
 
                 <Prop.Extras>
                   **Default value**: `"start"`

@@ -29,7 +29,7 @@ class StepBreakdown(BaseModel):
 @app.route("/canvarequest" , methods=['POST'])
 def canvarequest():
     user_input = request.get_json()['user_input']
-    page_dimensions = request.get_json()['page_dimensions']
+    page_dimensions = request.get_json()['page_dimensions']["dimensions"]
     print("User Input is : " , user_input)
     step_client = OpenAI()
     step_prompt = f'''
@@ -80,7 +80,7 @@ def canvarequest():
         try: 
             return response.json()['photos'][0]['src']['medium']
         except IndexError as e:
-            return "https://sdmntprwestus2.oaiusercontent.com/files/00000000-a9c4-61f8-9b98-3d68ca202d85/raw?se=2025-05-26T17%3A13%3A57Z&sp=r&sv=2024-08-04&sr=b&scid=6a86632d-ced8-54c2-82a9-a22533a27d6f&skoid=ea0c7534-f237-4ccd-b7ea-766c4ed977ad&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-05-26T11%3A03%3A15Z&ske=2025-05-27T11%3A03%3A15Z&sks=b&skv=2024-08-04&sig=4ojmkwBprZCOLH1pf73C0k8QA0TuhpOZNrHrHUzI04I%3D"
+            return "https://i.postimg.cc/jSYRBQWR/image-not-found.png"
         
     
     all_steps = response.output_parsed
@@ -88,10 +88,14 @@ def canvarequest():
     return_type_format = handle_rag(all_steps.rag_query)
 
     prompt = f'''
+    You are an Ai which can design a canva page, with great astehetics.
     Return array of json value in the following format according for given input steps :
     {return_type_format} 
+    Follow the postional properties given in the steps and generate the canva commands accordingly. This Should look asthetically pleasing. And try to keep content inside the page dimensions
     the output should be only a list of json objects, where each json object is a canva function format as given above. No extra tags, no extra lines, no extra spaces. Should start with [ and end with ], don't add any comments.
-    page_dimensions : {page_dimensions}, they are in this format : (width, height) format
+    page_dimensions : {page_dimensions}. Everything is in pixels, This width and height are different from the width and height of an element in the page.
+    The top left corrner is (top 0, left 0), top right corner is (left {page_dimensions["width"]}, top 0), bottom left corner is (left 0, top {page_dimensions["height"]}), and the bottom right corner is (left {page_dimensions["width"]}, top {page_dimensions["height"]}). 
+    All the elements should be inside the page dimensions. Some params for some elements have a spefic set of values to choose from, so choose from only those values, for example if you are dealing with textalign, choose only "start", "center", "end", "justify".
     '''
 
     user_steps = ",".join(all_steps.steps)
@@ -115,6 +119,7 @@ def canvarequest():
             print("New is : " , search_pexels_image(old))
             print("__________________________________________________________________________")
             item["ref"] = search_pexels_image(old)
+    print(page_dimensions)
     print("Edited Response : " , json.dumps(edited_response, indent=2))
     return json.dumps(edited_response, indent=2)
 
